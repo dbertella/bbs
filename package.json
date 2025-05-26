@@ -10,9 +10,11 @@
   },
   "dependencies": {
     "@astrojs/vercel": "^8.1.4",
+    "@tailwindcss/vite": "^4.1.7",
     "astro": "^5.8.0",
     "firebase": "^11.8.1",
     "firebase-admin": "^13.4.0",
+    "tailwindcss": "^4.1.7",
     "vercel": "^42.1.1"
   }
 }
