@@ -1,0 +1,35 @@
+---
+import { app } from "../../firebase/server";
+import { getFirestore, Timestamp } from "firebase-admin/firestore";
+import Layout from "../../layouts/Layout.astro";
+
+interface Booking {
+    id: string;
+    house: string;
+    dateFrom: Timestamp;
+    dateTo: Timestamp;
+}
+
+const db = getFirestore(app);
+const bookingsRef = db.collection("bookings");
+const bookingsSnapshot = await bookingsRef.get();
+const bookings = bookingsSnapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+})) as Booking[];
+---
+
+<Layout title="Bookings">
+    <h1>Bookings</h1>
+    <ul>
+        {
+            bookings.map((booking) => (
+                <li>
+                    <a href={`/bookings/${booking.id}`}>{booking.house}</a>
+                    <p>From: {booking.dateFrom.toDate().toString()}</p>
+                    <p>To: {booking.dateTo.toDate().toString()}</p>
+                </li>
+            ))
+        }
+    </ul>
+</Layout>

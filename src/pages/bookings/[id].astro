@@ -1,0 +1,37 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { app } from "../../firebase/server";
+import { getFirestore, Timestamp } from "firebase-admin/firestore";
+
+interface Booking {
+    id: string;
+    house: string;
+    dateFrom: Timestamp;
+    dateTo: Timestamp;
+}
+
+const { id } = Astro.params;
+
+if (!id) {
+    return Astro.redirect("/404");
+}
+
+const db = getFirestore(app);
+const bookingsRef = db.collection("bookings");
+const bookingSnapshot = await bookingsRef.doc(id).get();
+
+if (!bookingSnapshot.exists) {
+    return Astro.redirect("/404");
+}
+
+const booking = bookingSnapshot.data() as Booking;
+
+console.log({ booking });
+---
+
+<Layout title={booking.house}>
+    <h1>{booking.house}</h1>
+    <p>From: {booking.dateFrom.toDate()?.toString()}</p>
+    <p>To: {booking.dateTo.toDate()?.toString()}</p>
+    <a href={`/bookings/edit/${id}`}>Edit</a>
+</Layout>

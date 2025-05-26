@@ -1,0 +1,107 @@
+---
+import Layout from "../../../layouts/Layout.astro";
+import { app } from "../../../firebase/server";
+import { getFirestore, Timestamp } from "firebase-admin/firestore";
+
+interface Booking {
+    house: string;
+    dateFrom: Timestamp;
+    dateTo: Timestamp;
+}
+const { id } = Astro.params;
+
+if (!id) {
+    return Astro.redirect("/404");
+}
+
+const db = getFirestore(app);
+const bookingsRef = db.collection("bookings");
+const bookingSnapshot = await bookingsRef.doc(id).get();
+
+if (!bookingSnapshot.exists) {
+    return Astro.redirect("/404");
+}
+
+const booking = bookingSnapshot.data() as Booking;
+---
+
+<Layout title="Edit {booking.house}">
+    <h1>Edit {booking.house}</h1>
+    <form method="post" action={`/api/bookings/${id}`}>
+        <form class="space-y-4" action="/api/friends" method="post">
+            <div>
+                <label
+                    for="booking-type"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Where to</label
+                >
+                <select
+                    name="house"
+                    id="booking-type"
+                    name="booking-type"
+                    value={booking.house}
+                    required
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                >
+                    <option value="SERRA">La serra</option>
+                    <option value="SOLARO">Solaro</option>
+                </select>
+            </div>
+            <div class="flex gap-2">
+                <div class="flex-1">
+                    <label
+                        for="start-date"
+                        class="block text-sm font-medium text-gray-700 mb-1"
+                        >Start Date</label
+                    >
+                    <input
+                        id="start-date"
+                        name="dateFrom"
+                        value={booking.dateFrom.toDate().toJSON().slice(0, 10)}
+                        type="date"
+                        required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                </div>
+                <div class="flex-1">
+                    <label
+                        for="end-date"
+                        class="block text-sm font-medium text-gray-700 mb-1"
+                        >End Date</label
+                    >
+                    <input
+                        id="end-date"
+                        name="dateTo"
+                        type="date"
+                        value={booking.dateTo.toDate().toJSON().slice(0, 10)}
+                        required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                </div>
+            </div>
+            <button
+                type="submit"
+                class="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+            >
+                Add Booking
+            </button>
+        </form>
+        <button type="button" id="delete-document">Delete</button>
+    </form>
+    <script>
+        const deleteButton = document.getElementById(
+            "delete-document",
+        ) as HTMLButtonElement;
+        const url = document
+            .querySelector("form")
+            ?.getAttribute("action") as string;
+        deleteButton.addEventListener("click", async () => {
+            const response = await fetch(url, {
+                method: "DELETE",
+            });
+            if (response.redirected) {
+                window.location.assign(response.url);
+            }
+        });
+    </script>
+</Layout>
