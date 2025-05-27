@@ -1,46 +1,17 @@
 ---
-import Layout from "../../../layouts/Layout.astro";
-import { app } from "../../../firebase/server";
-import { getFirestore, Timestamp } from "firebase-admin/firestore";
-import { formatHouseName } from "../../../utils/house";
+import Layout from "../../layouts/Layout.astro";
 
-interface Booking {
-    house: string;
-    dateFrom: Timestamp;
-    dateTo: Timestamp;
-    notes?: string;
-}
+// Set default dates (today and tomorrow)
+const today = new Date();
+const tomorrow = new Date(today);
+tomorrow.setDate(tomorrow.getDate() + 1);
 
-const { id } = Astro.params;
-
-if (!id) {
-    return Astro.redirect("/404");
-}
-
-const db = getFirestore(app);
-const bookingsRef = db.collection("bookings");
-const bookingSnapshot = await bookingsRef.doc(id).get();
-
-if (!bookingSnapshot.exists) {
-    return Astro.redirect("/404");
-}
-
-const booking = bookingSnapshot.data() as Booking;
-if (!booking) {
-    return Astro.redirect("/404");
-}
-
-const formattedHouse = formatHouseName(booking.house);
-const dateFrom = booking.dateFrom.toDate();
-const dateTo = booking.dateTo.toDate();
-
-// Format dates for input fields (YYYY-MM-DD)
 const formatDateForInput = (date: Date) => {
     return date.toISOString().split('T')[0];
 };
 ---
 
-<Layout title={`Edit Booking - ${formattedHouse}`}>
+<Layout title="New Booking">
     <div class="bg-gray-100 flex flex-col items-center py-8">
         <div class="flex flex-col gap-8 w-full max-w-4xl">
             <!-- Header with Breadcrumb -->
@@ -70,28 +41,18 @@ const formatDateForInput = (date: Date) => {
                                 <svg class="h-5 w-5 flex-shrink-0 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
                                     <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z" />
                                 </svg>
-                                <a href={`/bookings/${id}`} class="ml-4 text-gray-400 hover:text-gray-500">
-                                    {formattedHouse}
-                                </a>
-                            </div>
-                        </li>
-                        <li>
-                            <div class="flex items-center">
-                                <svg class="h-5 w-5 flex-shrink-0 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z" />
-                                </svg>
-                                <span class="ml-4 text-gray-500">Edit</span>
+                                <span class="ml-4 text-gray-500">New Booking</span>
                             </div>
                         </li>
                     </ol>
                 </nav>
 
-                <h1 class="text-2xl font-bold text-gray-900">Edit Booking</h1>
+                <h1 class="text-2xl font-bold text-gray-900">New Booking</h1>
             </div>
 
-            <!-- Edit Form -->
+            <!-- New Booking Form -->
             <div class="bg-white rounded-xl shadow-md p-6">
-                <form action={`/api/bookings/${id}`} method="post" class="space-y-4">
+                <form action="/api/bookings" method="post" class="space-y-4">
                     <div>
                         <label
                             for="house"
@@ -103,8 +64,9 @@ const formatDateForInput = (date: Date) => {
                             required
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                         >
-                            <option value="SERRA" selected={booking.house === "SERRA"}>La serra</option>
-                            <option value="SOLARO" selected={booking.house === "SOLARO"}>Solaro</option>
+                            <option value="">Select</option>
+                            <option value="SERRA">La serra</option>
+                            <option value="SOLARO">Solaro</option>
                         </select>
                     </div>
                     <div class="flex gap-2">
@@ -118,7 +80,7 @@ const formatDateForInput = (date: Date) => {
                                 name="dateFrom"
                                 id="start-date"
                                 required
-                                value={formatDateForInput(dateFrom)}
+                                value={formatDateForInput(today)}
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                         </div>
@@ -132,7 +94,7 @@ const formatDateForInput = (date: Date) => {
                                 name="dateTo"
                                 id="end-date"
                                 required
-                                value={formatDateForInput(dateTo)}
+                                value={formatDateForInput(tomorrow)}
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                         </div>
@@ -147,11 +109,12 @@ const formatDateForInput = (date: Date) => {
                             name="notes"
                             rows="4"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >{booking.notes}</textarea>
+                            placeholder="Add any notes about this booking..."
+                        ></textarea>
                     </div>
                     <div class="flex justify-end space-x-3">
                         <a
-                            href={`/bookings/${id}`}
+                            href="/bookings"
                             class="py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                         >
                             Cancel
@@ -160,11 +123,11 @@ const formatDateForInput = (date: Date) => {
                             type="submit"
                             class="w-32 bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
                         >
-                            Save Changes
+                            Create Booking
                         </button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-</Layout>
+</Layout> 

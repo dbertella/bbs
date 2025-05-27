@@ -1,6 +1,7 @@
 ---
 import { app } from "../../firebase/server";
 import { getFirestore, Timestamp } from "firebase-admin/firestore";
+import { getAuth } from "firebase-admin/auth";
 import Layout from "../../layouts/Layout.astro";
 
 interface Booking {
@@ -8,28 +9,111 @@ interface Booking {
     house: string;
     dateFrom: Timestamp;
     dateTo: Timestamp;
+    userId: string;
 }
 
 const db = getFirestore(app);
+const auth = getAuth(app);
 const bookingsRef = db.collection("bookings");
 const bookingsSnapshot = await bookingsRef.get();
-const bookings = bookingsSnapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-})) as Booking[];
+const bookings = await Promise.all(bookingsSnapshot.docs.map(async (doc) => {
+    const data = doc.data() as Booking;
+    // Fetch user info for each booking
+    const user = await auth.getUser(data.userId);
+    const dateFrom = data.dateFrom.toDate();
+    const dateTo = data.dateTo.toDate();
+    const now = new Date();
+    const isUpcoming = dateFrom > now;
+    const isPast = dateTo < now;
+    return {
+        ...data,
+        id: doc.id,
+        dateFrom,
+        dateTo,
+        userName: user.displayName || 'Unknown User',
+        isUpcoming,
+        isPast
+    };
+}));
+
+const formatDate = (date: Date) => {
+    return date.toLocaleDateString('en-GB', { 
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+};
+
+// Sort bookings by date, most recent first
+const sortedBookings = [...bookings].sort((a, b) => 
+    b.dateFrom.getTime() - a.dateFrom.getTime()
+);
 ---
 
-<Layout title="Bookings">
-    <h1>Bookings</h1>
-    <ul>
-        {
-            bookings.map((booking) => (
-                <li>
-                    <a href={`/bookings/${booking.id}`}>{booking.house}</a>
-                    <p>From: {booking.dateFrom.toDate().toString()}</p>
-                    <p>To: {booking.dateTo.toDate().toString()}</p>
-                </li>
-            ))
-        }
-    </ul>
+<Layout title="Bookings Overview">
+    <div class="bg-gray-100 flex flex-col items-center py-8">
+        <div class="flex flex-col gap-8 w-full max-w-4xl">
+            <!-- Header with Breadcrumb -->
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <nav class="flex mb-4" aria-label="Breadcrumb">
+                    <ol class="flex items-center space-x-4">
+                        <li>
+                            <a href="/" class="text-gray-400 hover:text-gray-500">
+                                <svg class="h-5 w-5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                                </svg>
+                                <span class="sr-only">Home</span>
+                            </a>
+                        </li>
+                        <li>
+                            <div class="flex items-center">
+                                <svg class="h-5 w-5 flex-shrink-0 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z" />
+                                </svg>
+                                <span class="ml-4 text-gray-500">Bookings</span>
+                            </div>
+                        </li>
+                    </ol>
+                </nav>
+
+                <div class="flex justify-between items-center">
+                    <h1 class="text-2xl font-bold text-gray-900">All Bookings</h1>
+                    <a href="/bookings/new" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                        New Booking
+                    </a>
+                </div>
+            </div>
+
+            <!-- Bookings List -->
+            <div class="bg-white rounded-xl shadow-md p-6">
+                {sortedBookings.length > 0 ? (
+                    <ul class="space-y-3 text-left">
+                        {sortedBookings.map((booking) => {
+                            const statusColor = booking.isPast ? "gray" : booking.isUpcoming ? "blue" : "green";
+                            return (
+                                <li>
+                                    <a href={`/bookings/${booking.id}`} class="block hover:bg-gray-50 -mx-2 px-2 py-2 rounded-md transition-colors">
+                                        <div class="flex flex-col gap-1">
+                                            <div class="flex items-center gap-2">
+                                                <span class={`inline-block w-2 h-2 rounded-full bg-${statusColor}-500 flex-shrink-0`}></span>
+                                                <span class="font-medium">
+                                                    {formatDate(booking.dateFrom)} - {formatDate(booking.dateTo)}
+                                                </span>
+                                            </div>
+                                            <div class="flex items-center gap-2 ml-4">
+                                                <span class="text-gray-600">{booking.house}</span>
+                                                <span class="text-gray-500 text-sm">• {booking.userName}</span>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                            );
+                        })}
+                    </ul>
+                ) : (
+                    <p class="text-gray-500 text-sm">No bookings found</p>
+                )}
+            </div>
+        </div>
+    </div>
 </Layout>

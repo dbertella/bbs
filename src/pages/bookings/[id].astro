@@ -2,12 +2,17 @@
 import Layout from "../../layouts/Layout.astro";
 import { app } from "../../firebase/server";
 import { getFirestore, Timestamp } from "firebase-admin/firestore";
+import { getAuth } from "firebase-admin/auth";
+import { formatDate } from "../../utils/date";
+import { formatHouseName } from "../../utils/house";
 
 interface Booking {
     id: string;
     house: string;
     dateFrom: Timestamp;
     dateTo: Timestamp;
+    notes?: string;
+    userId: string;
 }
 
 const { id } = Astro.params;
@@ -17,6 +22,7 @@ if (!id) {
 }
 
 const db = getFirestore(app);
+const auth = getAuth(app);
 const bookingsRef = db.collection("bookings");
 const bookingSnapshot = await bookingsRef.doc(id).get();
 
@@ -24,14 +30,131 @@ if (!bookingSnapshot.exists) {
     return Astro.redirect("/404");
 }
 
-const booking = bookingSnapshot.data() as Booking;
+const bookingData = bookingSnapshot.data() as Booking;
+const user = await auth.getUser(bookingData.userId);
+const dateFrom = bookingData.dateFrom.toDate();
+const dateTo = bookingData.dateTo.toDate();
+const now = new Date();
+const isUpcoming = dateFrom > now;
+const isPast = dateTo < now;
+const statusColor = isUpcoming ? "blue" : isPast ? "gray" : "green";
+const statusText = isUpcoming ? "Upcoming" : isPast ? "Past" : "Active";
 
-console.log({ booking });
+const booking = {
+    ...bookingData,
+    house: formatHouseName(bookingData.house),
+    userName: user.displayName || 'Unknown User',
+    dateFrom,
+    dateTo
+};
+
+const pageTitle = `${booking.house} - ${formatDate(dateFrom)} to ${formatDate(dateTo)}`;
 ---
 
-<Layout title={booking.house}>
-    <h1>{booking.house}</h1>
-    <p>From: {booking.dateFrom.toDate()?.toString()}</p>
-    <p>To: {booking.dateTo.toDate()?.toString()}</p>
-    <a href={`/bookings/edit/${id}`}>Edit</a>
+<Layout title={pageTitle}>
+    <div class="bg-gray-100 flex flex-col items-center py-8">
+        <div class="flex flex-col gap-8 w-full max-w-4xl">
+            <!-- Header with Breadcrumb -->
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <nav class="flex mb-4" aria-label="Breadcrumb">
+                    <ol class="flex items-center space-x-4">
+                        <li>
+                            <a href="/" class="text-gray-400 hover:text-gray-500">
+                                <svg class="h-5 w-5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                                </svg>
+                                <span class="sr-only">Home</span>
+                            </a>
+                        </li>
+                        <li>
+                            <div class="flex items-center">
+                                <svg class="h-5 w-5 flex-shrink-0 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z" />
+                                </svg>
+                                <a href="/bookings" class="ml-4 text-gray-400 hover:text-gray-500">
+                                    Bookings
+                                </a>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="flex items-center">
+                                <svg class="h-5 w-5 flex-shrink-0 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z" />
+                                </svg>
+                                <span class="ml-4 text-gray-500">{booking.house}</span>
+                            </div>
+                        </li>
+                    </ol>
+                </nav>
+
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="flex items-center gap-3">
+                            <h1 class="text-2xl font-bold text-gray-900">{booking.house}</h1>
+                            <div class={`px-3 py-1 rounded-full bg-${statusColor}-100 text-${statusColor}-800 text-sm font-medium`}>
+                                {statusText}
+                            </div>
+                        </div>
+                        <p class="mt-1 text-sm text-gray-500">
+                            {formatDate(booking.dateFrom)} - {formatDate(booking.dateTo)}
+                        </p>
+                    </div>
+                    <div class="flex gap-2">
+                        <a
+                            href={`/bookings/edit/${id}`}
+                            class="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                        >
+                            Edit
+                        </a>
+                        <button
+                            type="button"
+                            id="delete-document"
+                            class="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+                        >
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Booking Details -->
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <div class="space-y-4">
+                    <div>
+                        <h2 class="text-sm font-medium text-gray-500">Guest</h2>
+                        <div class="mt-1 flex items-center">
+                            <svg class="h-5 w-5 text-gray-400 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="text-gray-900">{booking.userName}</span>
+                        </div>
+                    </div>
+
+                    {booking.notes && (
+                        <div>
+                            <h2 class="text-sm font-medium text-gray-500">Notes</h2>
+                            <p class="mt-1 text-gray-900 whitespace-pre-line">
+                                {booking.notes}
+                            </p>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    </div>
 </Layout>
+
+<script>
+    const deleteButton = document.getElementById("delete-document") as HTMLButtonElement;
+    const url = `/api/bookings/${window.location.pathname.split('/').pop()}`;
+    deleteButton.addEventListener("click", async () => {
+        if (confirm("Are you sure you want to delete this booking?")) {
+            const response = await fetch(url, {
+                method: "DELETE",
+            });
+            if (response.redirected) {
+                window.location.assign(response.url);
+            }
+        }
+    });
+</script>

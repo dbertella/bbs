@@ -1,0 +1,87 @@
+---
+import { app } from "../firebase/server";
+import { getFirestore } from "firebase-admin/firestore";
+import { getAuth } from "firebase-admin/auth";
+import type { Timestamp } from "firebase-admin/firestore";
+import { formatDate } from "../utils/date";
+import { formatHouseName } from "../utils/house";
+
+// Define types for our data structures
+type BookingData = {
+    house: string;
+    dateFrom: Timestamp;
+    dateTo: Timestamp;
+    userId: string;
+}
+
+type BookingWithUser = {
+    id: string;
+    house: string;
+    dateFrom: Date;
+    dateTo: Date;
+    userId: string;
+    userName: string;
+}
+
+// Initialize Firebase services
+const db = getFirestore(app);
+const auth = getAuth(app);
+const bookingsRef = db.collection("bookings");
+
+// Get current date at midnight
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+
+// Get upcoming bookings
+const bookingsSnapshot = await bookingsRef
+    .where('dateFrom', '>=', today)
+    .orderBy('dateFrom', 'asc')
+    .limit(5)
+    .get();
+
+// Process bookings data
+const bookings = await Promise.all(
+    bookingsSnapshot.docs.map(async (doc) => {
+        const data = doc.data() as BookingData;
+        const user = await auth.getUser(data.userId);
+        return {
+            id: doc.id,
+            house: formatHouseName(data.house),
+            dateFrom: data.dateFrom.toDate(),
+            dateTo: data.dateTo.toDate(),
+            userId: data.userId,
+            userName: user.displayName || 'Unknown User'
+        } as BookingWithUser;
+    })
+);
+---
+
+<div class="bg-white rounded-xl shadow-md p-6">
+    <h2 class="text-lg font-semibold mb-4">
+        Upcoming Bookings
+    </h2>
+    {bookings.length > 0 ? (
+        <ul class="space-y-3 text-left">
+            {bookings.map((booking) => (
+                <li>
+                    <a href={`/bookings/${booking.id}`} class="block hover:bg-gray-50 -mx-2 px-2 py-2 rounded-md transition-colors">
+                        <div class="flex flex-col gap-1">
+                            <div class="flex items-center gap-2">
+                                <span class="inline-block w-2 h-2 rounded-full bg-blue-500 flex-shrink-0"></span>
+                                <span class="font-medium">
+                                    {formatDate(booking.dateFrom)} - {formatDate(booking.dateTo)}
+                                </span>
+                            </div>
+                            <div class="flex items-center gap-2 ml-4">
+                                <span class="text-gray-600">{booking.house}</span>
+                                <span class="text-gray-500 text-sm">• {booking.userName}</span>
+                            </div>
+                        </div>
+                    </a>
+                </li>
+            ))}
+        </ul>
+    ) : (
+        <p class="text-gray-500 text-sm">No upcoming bookings</p>
+    )}
+</div> 
