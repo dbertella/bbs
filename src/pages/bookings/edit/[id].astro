@@ -3,6 +3,7 @@ import Layout from "../../../layouts/Layout.astro";
 import { app } from "../../../firebase/server";
 import { getFirestore, Timestamp } from "firebase-admin/firestore";
 import { formatHouseName } from "../../../utils/house";
+import { setupDateValidation } from "../../../utils/dateValidation";
 
 interface Booking {
     house: string;
@@ -168,3 +169,15 @@ const formatDateForInput = (date: Date) => {
         </div>
     </div>
 </Layout>
+
+<script>
+    import { setupDateValidation } from "../../../utils/dateValidation";
+
+    // Get form elements
+    const startDateInput = document.getElementById('start-date') as HTMLInputElement;
+    const endDateInput = document.getElementById('end-date') as HTMLInputElement;
+
+    if (startDateInput && endDateInput) {
+        setupDateValidation(startDateInput, endDateInput);
+    }
+</script>

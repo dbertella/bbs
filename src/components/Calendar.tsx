@@ -10,6 +10,8 @@ interface Booking {
   dateFrom: string;
   dateTo: string;
   userId: string;
+  userName?: string;
+  notes?: string;
 }
 
 interface CalendarEvent {
@@ -21,6 +23,8 @@ interface CalendarEvent {
   borderColor: string;
   textColor: string;
   url: string;
+  userName?: string;
+  notes?: string;
 }
 
 type DayCellContentArg = {
@@ -73,7 +77,9 @@ export default function Calendar() {
             backgroundColor: color,
             borderColor: color,
             textColor: '#ffffff',
-            url: `/bookings/${booking.id}`
+            url: `/bookings/${booking.id}`,
+            userName: booking.userName,
+            notes: booking.notes
           };
         });
 
@@ -123,6 +129,16 @@ export default function Calendar() {
               <div className="text-sm font-medium whitespace-normal">
                 {arg.event.title}
               </div>
+              {arg.event.extendedProps.userName && (
+                <div className="text-xs opacity-90 whitespace-normal">
+                  {arg.event.extendedProps.userName}
+                </div>
+              )}
+              {arg.event.extendedProps.notes && (
+                <div className="text-xs opacity-75 whitespace-normal truncate">
+                  {arg.event.extendedProps.notes}
+                </div>
+              )}
             </div>
           )
         }}

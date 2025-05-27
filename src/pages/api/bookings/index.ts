@@ -71,18 +71,24 @@ export const GET: APIRoute = async ({ request, cookies }) => {
         const bookingsRef = db.collection("bookings");
         const bookingsSnapshot = await bookingsRef.get();
         
-        const bookings = bookingsSnapshot.docs.map(doc => {
+        // Process bookings and fetch user info
+        const bookingsPromises = bookingsSnapshot.docs.map(async (doc) => {
             const data = doc.data();
-            // Convert Firebase Timestamps to ISO date strings
+            // Fetch user info
+            const user = await auth.getUser(data.userId);
+            
             return {
                 id: doc.id,
                 house: data.house,
                 dateFrom: data.dateFrom.toDate().toISOString(),
                 dateTo: data.dateTo.toDate().toISOString(),
                 userId: data.userId,
-                notes: data.notes
+                userName: user.displayName || 'Unknown User',
+                notes: data.notes || null
             };
         });
+
+        const bookings = await Promise.all(bookingsPromises);
 
         return new Response(JSON.stringify(bookings), {
             status: 200,
