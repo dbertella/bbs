@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
-import itLocale from "@fullcalendar/core/locales/it";
+// import itLocale from "@fullcalendar/core/locales/it";
 import { formatHouseName } from "../utils/house";
 
 interface Booking {
@@ -115,7 +115,7 @@ export default function Calendar() {
         dayCellContent={renderDayCellContent}
         businessHours={true}
         fixedWeekCount={false}
-        locale={itLocale}
+        // locale={itLocale}
         eventDisplay="block"
         eventTimeFormat={{
           hour: "2-digit",
