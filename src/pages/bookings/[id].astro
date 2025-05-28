@@ -48,7 +48,7 @@ const booking = {
     dateTo
 };
 
-const pageTitle = `${booking.house} - ${formatDate(dateFrom)} to ${formatDate(dateTo)}`;
+const pageTitle = `${formatHouseName(booking.house)} - ${user.displayName} - ${formatDate(dateFrom)} to ${formatDate(dateTo)}`;
 ---
 
 <Layout title={pageTitle}>

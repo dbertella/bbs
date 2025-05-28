@@ -3,6 +3,7 @@ import { app } from "../../firebase/server";
 import { getFirestore, Timestamp } from "firebase-admin/firestore";
 import { getAuth } from "firebase-admin/auth";
 import Layout from "../../layouts/Layout.astro";
+import { formatHouseName } from "../../utils/house";
 
 interface Booking {
     id: string;
@@ -101,7 +102,7 @@ const sortedBookings = [...bookings].sort((a, b) =>
                                                 </span>
                                             </div>
                                             <div class="flex items-center gap-2 ml-4">
-                                                <span class="text-gray-600">{booking.house}</span>
+                                                <span class="text-gray-600">{formatHouseName(booking.house)}</span>
                                                 <span class="text-gray-500 text-sm">• {booking.userName}</span>
                                             </div>
                                         </div>
