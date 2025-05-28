@@ -27,9 +27,9 @@ if (!user) {
             <!-- Dashboard Header -->
             <div class="w-full max-w-4xl">
                 <div
-                    class="bg-white rounded-xl shadow-md p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between"
+                    class="bg-white rounded-xl shadow-md p-6 relative"
                 >
-                    <div>
+                    <div class="pr-12">
                         <h1 class="text-2xl font-bold">
                             Welcome, <span class="text-blue-600"
                                 >{user.displayName}</span
@@ -39,7 +39,7 @@ if (!user) {
                             Here's your dashboard overview.
                         </p>
                     </div>
-                    <div class="relative mt-4 sm:mt-0">
+                    <div class="absolute top-4 right-4">
                         <button
                             type="button"
                             id="menu-button"
