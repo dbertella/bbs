@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
+import interactionPlugin from "@fullcalendar/interaction";
 // import itLocale from "@fullcalendar/core/locales/it";
 import { formatHouseName } from "../utils/house";
 
@@ -103,7 +104,7 @@ export default function Calendar() {
   return (
     <div className="demo-app-main">
       <FullCalendar
-        plugins={[dayGridPlugin]}
+        plugins={[dayGridPlugin, interactionPlugin]}
         editable={false}
         headerToolbar={{
           left: "",
@@ -142,6 +143,11 @@ export default function Calendar() {
             </div>
           )
         }}
+        // Enable touch/swipe navigation
+        selectable={false}
+        longPressDelay={0}
+        selectLongPressDelay={0}
+        nextDayThreshold="00:00:00"
       />
     </div>
   );

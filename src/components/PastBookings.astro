@@ -87,6 +87,14 @@ const bookings = await Promise.all(
             ))}
         </ul>
     ) : (
-        <p class="text-gray-500 text-sm">No past or active bookings</p>
+        <div class="text-center py-6">
+            <div class="text-gray-400">
+                <svg class="mx-auto h-12 w-12 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p class="text-gray-500 mb-1">No past bookings</p>
+                <p class="text-sm text-gray-400">Your booking history will appear here</p>
+            </div>
+        </div>
     )}
 </div> 
