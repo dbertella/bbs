@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 // import itLocale from "@fullcalendar/core/locales/it";
 import { formatHouseName } from "../utils/house";
+import { useSwipeable } from "react-swipeable";
 
 interface Booking {
   id: string;
@@ -100,10 +101,20 @@ export default function Calendar() {
       </>
     );
   };
+  const calendarRef = useRef<FullCalendar | null>(null);
+
+  // Handlers for swipe gestures
+  const handlers = useSwipeable({
+    onSwipedLeft: () => calendarRef.current?.getApi().next(),
+    onSwipedRight: () => calendarRef.current?.getApi().prev(),
+    preventScrollOnSwipe: true,
+    trackMouse: true // allows swipe with mouse on desktop
+  });
 
   return (
-    <div className="demo-app-main">
+    <div className="demo-app-main" {...handlers}>
       <FullCalendar
+        ref={calendarRef}
         plugins={[dayGridPlugin, interactionPlugin]}
         editable={false}
         headerToolbar={{
@@ -143,7 +154,6 @@ export default function Calendar() {
             </div>
           )
         }}
-        // Enable touch/swipe navigation
         selectable={false}
         longPressDelay={0}
         selectLongPressDelay={0}
