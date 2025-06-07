@@ -2,27 +2,11 @@
 import { app } from "../firebase/server";
 import { getFirestore } from "firebase-admin/firestore";
 import { getAuth } from "firebase-admin/auth";
-import type { Timestamp } from "firebase-admin/firestore";
 import { formatDate } from "../utils/date";
 import { formatHouseName } from "../utils/house";
+import type { BookingIn } from "../type";
+import { getFamilyInfo } from "../utils/getFamilyInfo";
 
-// Define types for our data structures
-type BookingData = {
-    house: string;
-    dateFrom: Timestamp;
-    dateTo: Timestamp;
-    userId: string;
-}
-
-type BookingWithUser = {
-    id: string;
-    house: string;
-    dateFrom: Date;
-    dateTo: Date;
-    userId: string;
-    userName: string;
-    isPast: boolean;
-}
 
 // Initialize Firebase services
 const db = getFirestore(app);
@@ -43,8 +27,9 @@ const bookingsSnapshot = await bookingsRef
 // Process bookings data
 const bookings = await Promise.all(
     bookingsSnapshot.docs.map(async (doc) => {
-        const data = doc.data() as BookingData;
+        const data = doc.data() as BookingIn;
         const user = await auth.getUser(data.userId);
+        const family = await getFamilyInfo(user.email);
         const dateFrom = data.dateFrom.toDate();
         const dateTo = data.dateTo.toDate();
         const isPast = dateTo < today;
@@ -55,6 +40,8 @@ const bookings = await Promise.all(
             dateTo,
             userId: data.userId,
             userName: user.displayName || 'Unknown User',
+            familyName: family?.name,
+            familyColor: family?.color,
             isPast
         };
     })
@@ -80,6 +67,7 @@ const bookings = await Promise.all(
                             <div class="flex items-center gap-2 ml-4">
                                 <span class="text-gray-600">{booking.house}</span>
                                 <span class="text-gray-500 text-sm">• {booking.userName}</span>
+                                <span class="text-sm">• <span class="inline-block w-2 h-2 rounded-full mr-1" style={{ background: booking.familyColor }} />{booking.familyName}</span>
                             </div>
                         </div>
                     </a>

@@ -5,16 +5,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 // import itLocale from "@fullcalendar/core/locales/it";
 import { formatHouseName } from "../utils/house";
 import { useSwipeable } from "react-swipeable";
-
-interface Booking {
-  id: string;
-  house: string;
-  dateFrom: string;
-  dateTo: string;
-  userId: string;
-  userName?: string;
-  notes?: string;
-}
+import type { BookingOut } from "../type";
 
 interface CalendarEvent {
   id: string;
@@ -52,7 +43,7 @@ export default function Calendar() {
         if (!response.ok) {
           throw new Error("Failed to fetch bookings");
         }
-        const bookings: Booking[] = await response.json();
+        const bookings: BookingOut[] = await response.json();
         
         const calendarEvents = bookings.map((booking) => {
           const start = new Date(booking.dateFrom);

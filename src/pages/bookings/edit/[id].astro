@@ -1,16 +1,10 @@
 ---
 import Layout from "../../../layouts/Layout.astro";
 import { app } from "../../../firebase/server";
-import { getFirestore, Timestamp } from "firebase-admin/firestore";
+import { getFirestore } from "firebase-admin/firestore";
 import { formatHouseName } from "../../../utils/house";
-import { setupDateValidation } from "../../../utils/dateValidation";
+import type { BookingIn } from "../../../type";
 
-interface Booking {
-    house: string;
-    dateFrom: Timestamp;
-    dateTo: Timestamp;
-    notes?: string;
-}
 
 const { id } = Astro.params;
 
@@ -26,7 +20,7 @@ if (!bookingSnapshot.exists) {
     return Astro.redirect("/404");
 }
 
-const booking = bookingSnapshot.data() as Booking;
+const booking = bookingSnapshot.data() as BookingIn;
 if (!booking) {
     return Astro.redirect("/404");
 }

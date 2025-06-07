@@ -2,17 +2,10 @@
 import { app } from "../firebase/server";
 import { getFirestore } from "firebase-admin/firestore";
 import { getAuth } from "firebase-admin/auth";
-import type { Timestamp } from "firebase-admin/firestore";
 import { formatDate } from "../utils/date";
 import { formatHouseName } from "../utils/house";
-
-// Define types for our data structures
-type BookingData = {
-    house: string;
-    dateFrom: Timestamp;
-    dateTo: Timestamp;
-    userId: string;
-}
+import type { BookingIn } from "../type";
+import { getFamilyInfo } from "../utils/getFamilyInfo";
 
 type BookingWithUser = {
     id: string;
@@ -21,6 +14,8 @@ type BookingWithUser = {
     dateTo: Date;
     userId: string;
     userName: string;
+    familyName: string;
+    familyColor: string;
 }
 
 // Initialize Firebase services
@@ -42,15 +37,18 @@ const bookingsSnapshot = await bookingsRef
 // Process bookings data
 const bookings = await Promise.all(
     bookingsSnapshot.docs.map(async (doc) => {
-        const data = doc.data() as BookingData;
+        const data = doc.data() as BookingIn;
         const user = await auth.getUser(data.userId);
+        const family = await getFamilyInfo(user.email);
         return {
             id: doc.id,
             house: formatHouseName(data.house),
             dateFrom: data.dateFrom.toDate(),
             dateTo: data.dateTo.toDate(),
             userId: data.userId,
-            userName: user.displayName || 'Unknown User'
+            userName: user.displayName || 'Unknown User',
+            familyName: family?.name,
+            familyColor: family?.color,
         } as BookingWithUser;
     })
 );
@@ -75,6 +73,7 @@ const bookings = await Promise.all(
                             <div class="flex items-center gap-2 ml-4">
                                 <span class="text-gray-600">{booking.house}</span>
                                 <span class="text-gray-500 text-sm">• {booking.userName}</span>
+                                <span class="text-sm">• <span class="inline-block w-2 h-2 rounded-full mr-1" style={{ background: booking.familyColor }} />{booking.familyName}</span>
                             </div>
                         </div>
                     </a>

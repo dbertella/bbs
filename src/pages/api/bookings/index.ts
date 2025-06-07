@@ -2,6 +2,8 @@ import type { APIRoute } from "astro";
 import { app } from "../../../firebase/server";
 import { getFirestore } from "firebase-admin/firestore";
 import { getAuth } from "firebase-admin/auth";
+import { getFamilyInfo } from "../../../utils/getFamilyInfo";
+import type { BookingIn } from "../../../type";
 
 export const POST: APIRoute = async ({ request, redirect, cookies }) => {
   const formData = await request.formData();
@@ -70,12 +72,12 @@ export const GET: APIRoute = async ({ request, cookies }) => {
         const db = getFirestore(app);
         const bookingsRef = db.collection("bookings");
         const bookingsSnapshot = await bookingsRef.get();
-        
         // Process bookings and fetch user info
         const bookingsPromises = bookingsSnapshot.docs.map(async (doc) => {
             const data = doc.data();
             // Fetch user info
             const user = await auth.getUser(data.userId);
+            const family = await getFamilyInfo(user.email);
             
             return {
                 id: doc.id,
@@ -83,7 +85,10 @@ export const GET: APIRoute = async ({ request, cookies }) => {
                 dateFrom: data.dateFrom.toDate().toISOString(),
                 dateTo: data.dateTo.toDate().toISOString(),
                 userId: data.userId,
+                userEmail: user.email || 'Unknown User',
                 userName: user.displayName || 'Unknown User',
+                familyName: family?.name,
+                familyColor: family?.color,
                 notes: data.notes || null
             };
         });

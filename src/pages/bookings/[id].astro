@@ -5,15 +5,8 @@ import { getFirestore, Timestamp } from "firebase-admin/firestore";
 import { getAuth } from "firebase-admin/auth";
 import { formatDate } from "../../utils/date";
 import { formatHouseName } from "../../utils/house";
-
-interface Booking {
-    id: string;
-    house: string;
-    dateFrom: Timestamp;
-    dateTo: Timestamp;
-    notes?: string;
-    userId: string;
-}
+import type { BookingIn } from "../../type";
+import { getFamilyInfo } from "../../utils/getFamilyInfo";
 
 const { id } = Astro.params;
 
@@ -30,20 +23,23 @@ if (!bookingSnapshot.exists) {
     return Astro.redirect("/404");
 }
 
-const bookingData = bookingSnapshot.data() as Booking;
-const user = await auth.getUser(bookingData.userId);
-const dateFrom = bookingData.dateFrom.toDate();
-const dateTo = bookingData.dateTo.toDate();
+const data = bookingSnapshot.data() as BookingIn;
+const user = await auth.getUser(data.userId);
+const dateFrom = data.dateFrom.toDate();
+const dateTo = data.dateTo.toDate();
 const now = new Date();
 const isUpcoming = dateFrom > now;
 const isPast = dateTo < now;
 const statusColor = isUpcoming ? "blue" : isPast ? "gray" : "green";
 const statusText = isUpcoming ? "Upcoming" : isPast ? "Past" : "Active";
+const family = await getFamilyInfo(user.email);
 
 const booking = {
-    ...bookingData,
-    house: formatHouseName(bookingData.house),
+    ...data,
+    house: formatHouseName(data.house),
     userName: user.displayName || 'Unknown User',
+    familyName: family?.name,
+    familyColor: family?.color,
     dateFrom,
     dateTo
 };
@@ -127,6 +123,8 @@ const pageTitle = `${formatHouseName(booking.house)} - ${user.displayName} - ${f
                                 <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
                             </svg>
                             <span class="text-gray-900">{booking.userName}</span>
+                            <span class="text-gray-900 mx-1">•</span>
+                            <span><span class="inline-block w-2 h-2 rounded-full mr-1" style={{ background: booking.familyColor }} />{booking.familyName}</span>
                         </div>
                     </div>
 
