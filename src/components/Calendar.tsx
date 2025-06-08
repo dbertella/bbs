@@ -34,8 +34,6 @@ type DayCellContentArg = {
 export default function Calendar() {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
 
-  console.log(events);
-
   useEffect(() => {
     const fetchBookings = async () => {
       try {
