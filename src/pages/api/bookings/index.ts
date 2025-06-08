@@ -11,6 +11,7 @@ export const POST: APIRoute = async ({ request, redirect, cookies }) => {
   const dateFrom = formData.get("dateFrom")?.toString();
   const dateTo = formData.get("dateTo")?.toString();
   const notes = formData.get("notes")?.toString();
+  const numberPeople = formData.get("numberPeople")?.toString();
 
   if (!house || !dateFrom || !dateTo) {
     return new Response("Missing required fields", {
@@ -38,6 +39,7 @@ export const POST: APIRoute = async ({ request, redirect, cookies }) => {
       dateFrom: new Date(dateFrom),
       dateTo: new Date(dateTo),
       notes: notes || null,
+      numberPeople: numberPeople || null,
       userId,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -89,7 +91,8 @@ export const GET: APIRoute = async ({ request, cookies }) => {
                 userName: user.displayName || 'Unknown User',
                 familyName: family?.name,
                 familyColor: family?.color,
-                notes: data.notes || null
+                notes: data.notes || null,
+                numberPeople: data.numberPeople || null
             };
         });
 

@@ -44,6 +44,7 @@ export const POST: APIRoute = async ({ params, redirect, request, cookies }) => 
     const dateFrom = formData.get("dateFrom")?.toString();
     const dateTo = formData.get("dateTo")?.toString();
     const notes = formData.get("notes")?.toString();
+    const numberPeople = formData.get("numberPeople")?.toString();
 
     if (!house || !dateFrom || !dateTo) {
       return new Response("Missing required fields", { status: 400 });
@@ -55,6 +56,7 @@ export const POST: APIRoute = async ({ params, redirect, request, cookies }) => 
       dateFrom: new Date(dateFrom),
       dateTo: new Date(dateTo),
       notes: notes || null,
+      numberPeople: numberPeople || null,
       updatedAt: new Date(),
     });
 

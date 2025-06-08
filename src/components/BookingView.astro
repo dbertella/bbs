@@ -15,10 +15,12 @@ const { booking } = Astro.props;
     </span>
   </div>
   <div class="flex items-center gap-2 ml-4">
-    <span class="text-gray-600">{formatHouseName(booking.house)}</span>
+    <span class="text-gray-600 text-sm">{formatHouseName(booking.house)}</span>
     <span class="text-gray-500 text-sm">{booking.userName}</span>
     <span
       class="inline-block text-xs font-semibold ml-1 px-3 py-1 rounded-full text-gray-200"
       style={{ background: booking.familyColor }}>{booking.familyName}</span>
   </div>
+  {booking.numberPeople && <div class="text-gray-500 text-sm ml-4">• {booking.numberPeople} guests</div>}
+  {booking.notes && <div class="text-gray-500 text-sm ml-4">• {booking.notes}</div>}
 </div>

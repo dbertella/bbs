@@ -44,6 +44,8 @@ const booking = {
   dateTo,
 };
 
+console.log(booking);
+
 const pageTitle = `${formatHouseName(booking.house)} - ${user.displayName} - ${formatDate(dateFrom)} to ${formatDate(dateTo)}`;
 ---
 
@@ -135,8 +137,9 @@ const pageTitle = `${formatHouseName(booking.house)} - ${user.displayName} - ${f
       <!-- Booking Details -->
       <div class="bg-white rounded-xl shadow-md p-6">
         <div class="space-y-4">
-          <div>
-            <h2 class="text-sm font-medium text-gray-500">Guest</h2>
+            <h2 class="text-sm font-medium text-gray-500">
+              Booked by
+            </h2>
             <div class="mt-1 flex items-center">
               <svg
                 class="h-5 w-5 text-gray-400 mr-2"
@@ -149,14 +152,24 @@ const pageTitle = `${formatHouseName(booking.house)} - ${user.displayName} - ${f
                   d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
                   clip-rule="evenodd"></path>
               </svg>
-              <span class="text-gray-900">{booking.userName}</span>
-              <span
-                class="inline-block text-xs font-semibold ml-2 px-3 py-1 rounded-full text-gray-200"
-                style={{ background: booking.familyColor }}
-                >{booking.familyName}</span
-              >
-            </div>
+            <span class="text-gray-900">by {booking.userName}</span>
+            <span
+              class="inline-block text-xs font-semibold ml-2 px-3 py-1 rounded-full text-gray-200"
+              style={{ background: booking.familyColor }}
+              >{booking.familyName}</span
+            >
           </div>
+
+          {
+            booking.numberPeople && (
+              <div>
+                <h2 class="text-sm font-medium text-gray-500">Guests number</h2>
+                <p class="mt-1 text-gray-900 whitespace-pre-line">
+                  {booking.numberPeople}
+                </p>
+              </div>
+            )
+          }
 
           {
             booking.notes && (

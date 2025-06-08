@@ -42,6 +42,7 @@ const bookings = await Promise.all(
             userName: user.displayName || 'Unknown User',
             familyName: family?.name,
             familyColor: family?.color,
+            notes: data.notes,
             isPast
         };
     })

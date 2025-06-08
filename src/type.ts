@@ -8,6 +8,7 @@ export interface BookingIn {
     userId: string;
     userEmail: string;
     notes?: string
+    numberPeople?: string
 }
 
 export interface BookingOut {
