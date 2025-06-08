@@ -1,0 +1,24 @@
+---
+import { formatDate } from "../utils/date";
+import { formatHouseName } from "../utils/house";
+
+const { booking } = Astro.props;
+---
+
+<div class="flex flex-col gap-1">
+  <div class="flex items-center gap-2">
+    <span
+      class={`inline-block w-2 h-2 rounded-full ${booking.isPast ? "bg-gray-500" : "bg-green-500"} flex-shrink-0`}
+    ></span>
+    <span class="font-medium">
+      {formatDate(booking.dateFrom)} - {formatDate(booking.dateTo)}
+    </span>
+  </div>
+  <div class="flex items-center gap-2 ml-4">
+    <span class="text-gray-600">{formatHouseName(booking.house)}</span>
+    <span class="text-gray-500 text-sm">{booking.userName}</span>
+    <span
+      class="inline-block text-xs font-semibold ml-1 px-3 py-1 rounded-full text-gray-200"
+      style={{ background: booking.familyColor }}>{booking.familyName}</span>
+  </div>
+</div>

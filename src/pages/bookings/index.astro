@@ -6,6 +6,7 @@ import Layout from "../../layouts/Layout.astro";
 import { formatHouseName } from "../../utils/house";
 import type { BookingIn } from "../../type";
 import { getFamilyInfo } from "../../utils/getFamilyInfo";
+import BookingView from "../../components/BookingView.astro";
 
 const db = getFirestore(app);
 const auth = getAuth(app);
@@ -92,19 +93,7 @@ const sortedBookings = [...bookings].sort((a, b) =>
                             return (
                                 <li>
                                     <a href={`/bookings/${booking.id}`} class="block hover:bg-gray-50 -mx-2 px-2 py-2 rounded-md transition-colors">
-                                        <div class="flex flex-col gap-1">
-                                            <div class="flex items-center gap-2">
-                                                <span class={`inline-block w-2 h-2 rounded-full bg-${statusColor}-500 flex-shrink-0`}></span>
-                                                <span class="font-medium">
-                                                    {formatDate(booking.dateFrom)} - {formatDate(booking.dateTo)}
-                                                </span>
-                                            </div>
-                                            <div class="flex items-center gap-2 ml-4">
-                                                <span class="text-gray-600">{formatHouseName(booking.house)}</span>
-                                                <span class="text-gray-500 text-sm">• {booking.userName}</span>
-                                                <span class="text-sm">• <span class="inline-block w-2 h-2 rounded-full mr-1" style={{ background: booking.familyColor }} />{booking.familyName}</span>
-                                            </div>
-                                        </div>
+                                        <BookingView booking={booking} />
                                     </a>
                                 </li>
                             );
