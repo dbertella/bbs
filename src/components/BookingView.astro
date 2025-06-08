@@ -1,6 +1,6 @@
 ---
 import { formatDate } from "../utils/date";
-import { formatHouseName } from "../utils/house";
+import { formatHouseName, houseBgColor } from "../utils/house";
 
 const { booking } = Astro.props;
 ---
@@ -8,14 +8,16 @@ const { booking } = Astro.props;
 <div class="flex flex-col gap-1">
   <div class="flex items-center gap-2">
     <span
-      class={`inline-block w-2 h-2 rounded-full ${booking.isPast ? "bg-gray-500" : "bg-green-500"} flex-shrink-0`}
-    ></span>
+      class={`inline-block w-2 h-2 rounded-full ${booking.isPast ? "bg-gray-500" : houseBgColor(booking.house)} flex-shrink-0`}
+    />
+    <span class=font-medium">{formatHouseName(booking.house)}</span>
+    <span class=font-medium">•</span>
+
     <span class="font-medium">
       {formatDate(booking.dateFrom)} - {formatDate(booking.dateTo)}
     </span>
   </div>
-  <div class="flex items-center gap-2 ml-4">
-    <span class="text-gray-600 text-sm">{formatHouseName(booking.house)}</span>
+  <div class="flex justify-between items-center gap-2 ml-4">
     <span class="text-gray-500 text-sm">{booking.userName}</span>
     <span
       class="inline-block text-xs font-semibold ml-1 px-3 py-1 rounded-full text-white"

@@ -35,7 +35,7 @@ const bookings = await Promise.all(
         const isPast = dateTo < today;
         return {
             id: doc.id,
-            house: formatHouseName(data.house),
+            house: data.house,
             dateFrom,
             dateTo,
             userId: data.userId,

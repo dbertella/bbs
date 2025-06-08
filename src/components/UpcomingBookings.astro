@@ -43,7 +43,7 @@ const bookings = await Promise.all(
         const family = await getFamilyInfo(user.email);
         return {
             id: doc.id,
-            house: formatHouseName(data.house),
+            house: data.house,
             dateFrom: data.dateFrom.toDate(),
             dateTo: data.dateTo.toDate(),
             userId: data.userId,
@@ -58,9 +58,12 @@ const bookings = await Promise.all(
 ---
 
 <div class="bg-white rounded-xl shadow-md p-6">
-    <h2 class="text-lg font-semibold mb-4">
-        Upcoming Bookings
-    </h2>
+    <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold">
+            Upcoming Bookings
+        </h2>
+        <a href="/bookings" class="text-blue-600 hover:underline">All bookings</a>
+    </div>
     {bookings.length > 0 ? (
         <ul class="space-y-3 text-left">
             {bookings.map((booking) => (
