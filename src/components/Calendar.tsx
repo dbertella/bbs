@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
-// import itLocale from "@fullcalendar/core/locales/it";
+import locale from "@fullcalendar/core/locales/en-gb";
 import { formatHouseName } from "../utils/house";
 import { useSwipeable } from "react-swipeable";
 import type { BookingOut } from "../type";
@@ -116,7 +116,7 @@ export default function Calendar() {
         dayCellContent={renderDayCellContent}
         businessHours={true}
         fixedWeekCount={false}
-        // locale={itLocale}
+        locale={locale}
         eventDisplay="block"
         eventTimeFormat={{
           hour: "2-digit",
