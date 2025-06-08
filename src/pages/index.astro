@@ -10,110 +10,127 @@ const auth = getAuth(app);
 
 /* Check current session */
 if (!Astro.cookies.has("__session")) {
-    return Astro.redirect("/signin");
+  return Astro.redirect("/signin");
 }
 const sessionCookie = Astro?.cookies?.get("__session")?.value ?? "";
 const decodedCookie = await auth.verifySessionCookie(sessionCookie);
 const user = await auth.getUser(decodedCookie.uid);
 
 if (!user) {
-    return Astro.redirect("/signin");
+  return Astro.redirect("/signin");
 }
 ---
 
 <Layout title="dashboard">
-    <div class="bg-gray-100 flex flex-col items-center py-8">
-        <div class="w-full max-w-4xl">
-            <!-- Dashboard Header -->
-            <div class="bg-white rounded-xl shadow-md p-6 relative">
-                <div class="pr-12">
-                    <div>
-                        <h1 class="text-2xl font-bold">
-                            Welcome, <span class="text-blue-600">{user.displayName}</span> 😉
-                        </h1>
-                        <p class="text-gray-700 mb-4">
-                            Here's the Bertella's booking system.
-                        </p>
-                        <a
-                            href="/bookings/new"
-                            class="inline-block bg-blue-600 text-white py-2 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-                        >
-                            Add Booking
-                        </a>
-                    </div>
-                </div>
-                <div class="absolute top-4 right-4">
-                    <button
-                        type="button"
-                        id="menu-button"
-                        class="p-2 rounded-full hover:bg-gray-100 transition-colors"
-                        aria-expanded="false"
-                        aria-haspopup="true"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-                        </svg>
-                    </button>
-                    <div
-                        id="menu-dropdown"
-                        class="hidden origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10"
-                        role="menu"
-                        aria-orientation="vertical"
-                        aria-labelledby="menu-button"
-                        tabindex="-1"
-                    >
-                        <div class="py-1" role="none">
-                            <form action="/api/auth/signout" method="POST" role="none">
-                                <button
-                                    type="submit"
-                                    class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                    role="menuitem"
-                                    tabindex="-1"
-                                >
-                                    Sign out
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
+  <div class="bg-gray-100 flex flex-col items-center py-8">
+    <div class="w-full max-w-4xl">
+      <!-- Dashboard Header -->
+      <div class="bg-white rounded-xl shadow-md p-6 relative">
+        <div class="pr-12">
+          <div>
+            <h1 class="text-2xl font-bold">
+              Welcome, <span class="text-blue-600">{user.displayName}</span> 😉
+            </h1>
+            <p class="text-gray-700 mb-4">
+              Here's the Bertella's booking system.
+            </p>
+            <a
+              href="/bookings/new"
+              class="inline-block bg-blue-600 text-white py-2 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+            >
+              Add Booking
+            </a>
+          </div>
+        </div>
+        <div class="absolute top-4 right-4">
+          <button
+            type="button"
+            id="menu-button"
+            class="p-2 rounded-full hover:bg-gray-100 transition-colors"
+            aria-expanded="false"
+            aria-haspopup="true"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5 text-gray-500"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"
+              ></path>
+            </svg>
+          </button>
+          <div
+            id="menu-dropdown"
+            class="hidden origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10"
+            role="menu"
+            aria-orientation="vertical"
+            aria-labelledby="menu-button"
+            tabindex="-1"
+          >
+            <a
+              href="/profile"
+              class="inline-block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              role="menuitem"
+            >
+              Profile
+            </a>
+            <div class="py-1" role="none">
+              <form action="/api/auth/signout" method="POST" role="none">
+                <button
+                  type="submit"
+                  class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  role="menuitem"
+                  tabindex="-1"
+                >
+                  Sign out
+                </button>
+              </form>
             </div>
+          </div>
         </div>
-
-        <!-- Dashboard Widgets -->
-        <div class="w-full max-w-4xl grid gap-8 grid-cols-1 mt-8">
-            <!-- Calendar Widget -->
-            <div class="bg-white rounded-xl shadow-md p-6">
-                <Calendar client:load />
-            </div>
-        </div>
-
-        <div class="w-full max-w-4xl grid gap-8 grid-cols-1 md:grid-cols-2 mt-8">
-            <!-- Upcoming Bookings -->
-            <UpcomingBookings />
-
-            <!-- Past & Active Bookings -->
-            <PastBookings />
-        </div>
+      </div>
     </div>
+
+    <!-- Dashboard Widgets -->
+    <div class="w-full max-w-4xl grid gap-8 grid-cols-1 mt-8">
+      <!-- Calendar Widget -->
+      <div class="bg-white rounded-xl shadow-md p-6">
+        <Calendar client:load />
+      </div>
+    </div>
+
+    <div class="w-full max-w-4xl grid gap-8 grid-cols-1 md:grid-cols-2 mt-8">
+      <!-- Upcoming Bookings -->
+      <UpcomingBookings />
+
+      <!-- Past & Active Bookings -->
+      <PastBookings />
+    </div>
+  </div>
 </Layout>
 
 <script>
-    const menuButton = document.getElementById('menu-button');
-    const menuDropdown = document.getElementById('menu-dropdown');
+  const menuButton = document.getElementById("menu-button");
+  const menuDropdown = document.getElementById("menu-dropdown");
 
-    if (menuButton && menuDropdown) {
-        menuButton.addEventListener('click', () => {
-            const isExpanded = menuButton.getAttribute('aria-expanded') === 'true';
-            menuButton.setAttribute('aria-expanded', (!isExpanded).toString());
-            menuDropdown.classList.toggle('hidden');
-        });
+  if (menuButton && menuDropdown) {
+    menuButton.addEventListener("click", () => {
+      const isExpanded = menuButton.getAttribute("aria-expanded") === "true";
+      menuButton.setAttribute("aria-expanded", (!isExpanded).toString());
+      menuDropdown.classList.toggle("hidden");
+    });
 
-        // Close the dropdown when clicking outside
-        document.addEventListener('click', (event) => {
-            if (!menuButton.contains(event.target as Node) && !menuDropdown.contains(event.target as Node)) {
-                menuButton.setAttribute('aria-expanded', 'false');
-                menuDropdown.classList.add('hidden');
-            }
-        });
-    }
+    // Close the dropdown when clicking outside
+    document.addEventListener("click", (event) => {
+      if (
+        !menuButton.contains(event.target as Node) &&
+        !menuDropdown.contains(event.target as Node)
+      ) {
+        menuButton.setAttribute("aria-expanded", "false");
+        menuDropdown.classList.add("hidden");
+      }
+    });
+  }
 </script>

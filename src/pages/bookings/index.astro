@@ -1,9 +1,8 @@
 ---
 import { app } from "../../firebase/server";
-import { getFirestore, Timestamp } from "firebase-admin/firestore";
+import { getFirestore } from "firebase-admin/firestore";
 import { getAuth } from "firebase-admin/auth";
 import Layout from "../../layouts/Layout.astro";
-import { formatHouseName } from "../../utils/house";
 import type { BookingIn } from "../../type";
 import { getFamilyInfo } from "../../utils/getFamilyInfo";
 import BookingView from "../../components/BookingView.astro";
